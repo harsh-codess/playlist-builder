@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#08070a">
+  <title>Playlist Builder</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <h1 class="sr-only">Playlist Builder</h1>
+
+  <main class="stage" id="stage" data-mobile="main">
+    <!-- Now Playing -->
+    <section class="panel panel-now" id="panelNow" aria-label="Now playing">
+      <header class="topbar">
+        <button class="icon-btn" data-action="now-collapse" aria-label="Minimize now playing"><span data-icon="chevronDown"></span></button>
+        <span class="handle" aria-hidden="true"></span>
+        <button class="icon-btn" data-action="open-menu" data-menu="now" aria-label="Now playing options" aria-haspopup="menu"><span data-icon="dots"></span></button>
+      </header>
+
+      <div class="now-body">
+        <div class="now-head">
+          <div class="now-titles">
+            <h2 class="now-title" id="nowTitle">Not playing</h2>
+            <p class="now-creator" id="nowCreator">Pick something from your library</p>
+            <div class="now-meta" id="nowMeta"></div>
+          </div>
+          <button class="icon-btn heart-btn" id="nowFav" data-action="now-fav" aria-label="Toggle favorite" aria-pressed="false" disabled><span data-icon="heart"></span></button>
+        </div>
+
+        <div class="disc-stage">
+          <button class="neighbor neighbor-prev" id="nbPrev" data-action="prev" aria-label="Previous item" tabindex="-1"></button>
+          <button class="neighbor neighbor-next" id="nbNext" data-action="next" aria-label="Next item" tabindex="-1"></button>
+          <div class="ring" id="ring" role="slider" tabindex="0" aria-label="Seek" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0" aria-valuetext="0:00">
+            <div class="ring-line" aria-hidden="true"></div>
+            <svg class="ring-svg" viewBox="0 0 100 100" aria-hidden="true">
+              <defs>
+                <linearGradient id="arcGrad" gradientUnits="userSpaceOnUse" x1="50" y1="92" x2="50" y2="8">
+                  <stop offset="0" stop-color="#ffffff"/>
+                  <stop offset=".5" stop-color="#a9c8ff"/>
+                  <stop offset="1" stop-color="#7f9cff" stop-opacity=".45"/>
+                </linearGradient>
+              </defs>
+              <path class="arc-bar" id="arcBar" d="M50 91"/>
+              <circle class="arc-knob" id="arcKnob" cx="50" cy="91" r="1.5"/>
+            </svg>
+            <div class="disc-art art" id="discArt"></div>
+            <div class="ring-time" id="ringTime"><span id="timeCur">0:00</span><span class="ring-time-total" id="timeTotal"></span></div>
+          </div>
+        </div>
+
+        <div class="controls" role="group" aria-label="Playback controls">
+          <button class="ctl" id="btnShuffle" data-action="shuffle" aria-label="Shuffle" aria-pressed="false"><span data-icon="shuffle"></span></button>
+          <button class="ctl" data-action="prev" aria-label="Previous"><span data-icon="prev"></span></button>
+          <button class="ctl ctl-play" id="btnPlay" data-action="toggle" aria-label="Play"><span data-icon="play"></span></button>
+          <button class="ctl" data-action="next" aria-label="Next"><span data-icon="next"></span></button>
+          <button class="ctl" id="btnRepeat" data-action="repeat" aria-label="Repeat: off" aria-pressed="false"><span data-icon="repeat"></span></button>
+        </div>
+      </div>
+
+      <nav class="nav glass" aria-label="Main"></nav>
+    </section>
+
+    <!-- Content views -->
+    <section class="panel panel-main" id="panelMain" aria-label="Library and playlists">
+      <header class="topbar">
+        <button class="icon-btn" data-action="main-back" id="mainBack" aria-label="Back"><span data-icon="chevronDown"></span></button>
+        <span class="handle" aria-hidden="true"></span>
+        <button class="icon-btn" data-action="open-menu" data-menu="view" aria-label="View options" aria-haspopup="menu"><span data-icon="dots"></span></button>
+      </header>
+
+      <div class="view-host" id="viewHost"></div>
+
+      <div class="mini glass" id="mini" hidden>
+        <div class="mini-fill" id="miniFill"></div>
+        <button class="mini-open" data-action="open-now" aria-label="Open now playing">
+          <span class="mini-art art" id="miniArt"></span>
+          <span class="mini-text">
+            <span class="mini-title" id="miniTitle"></span>
+            <span class="mini-creator" id="miniCreator"></span>
+          </span>
+        </button>
+        <button class="icon-btn mini-btn" id="miniPlay" data-action="toggle" aria-label="Play"><span data-icon="play"></span></button>
+        <button class="icon-btn mini-btn" data-action="next" aria-label="Next"><span data-icon="next"></span></button>
+      </div>
+
+      <nav class="nav glass" aria-label="Main"></nav>
+    </section>
+  </main>
+
+  <div class="toasts" id="toasts" role="status" aria-live="polite"></div>
+  <div class="menu glass" id="menu" role="menu" hidden></div>
+  <div class="sheet-backdrop" id="sheetBackdrop" hidden>
+    <div class="sheet glass" id="sheet" role="dialog" aria-modal="true"></div>
+  </div>
+
+  <audio id="audio" preload="metadata"></audio>
+  <script src="/app.js"></script>
+</body>
+</html>

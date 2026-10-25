@@ -1,0 +1,6 @@
+bin/
+data/library.json
+data/library.json.tmp
+data/samples/
+report/build/
+*.dSYM/

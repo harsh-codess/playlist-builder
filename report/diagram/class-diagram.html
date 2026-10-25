@@ -1,0 +1,290 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  body { margin: 0; background: #fff; font-family: "Helvetica Neue", Arial, sans-serif; }
+  #canvas { position: relative; width: 1600px; height: 1240px; }
+  .cls { position: absolute; border: 1.6px solid #2b2d42; background: #fff; font-size: 13px; color: #1d1d1f; box-shadow: 3px 3px 0 #e4e4ec; }
+  .cls h3 { margin: 0; padding: 6px 8px; text-align: center; font-size: 15px; background: #ece9f7; border-bottom: 1.4px solid #2b2d42; }
+  .cls h3 small { display: block; font-weight: normal; font-style: italic; font-size: 11px; color: #555; }
+  .cls.abstract h3 { font-style: italic; }
+  .cls .sec { padding: 5px 8px; border-bottom: 1px solid #2b2d42; font-family: Menlo, Consolas, monospace; font-size: 11.5px; line-height: 1.45; white-space: pre; }
+  .cls .sec:last-child { border-bottom: none; }
+  .exc h3 { background: #fde8e8; }
+  .web h3 { background: #e5f2fb; }
+  .data h3 { background: #e8f6ec; }
+  svg { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+  .cls { z-index: 1; }
+  .legend { position: absolute; left: 40px; top: 20px; font-size: 13px; line-height: 1.7; color: #333; }
+  .legend b { font-size: 18px; display: block; margin-bottom: 4px; color: #111; }
+</style>
+</head>
+<body>
+<div id="canvas">
+  <div class="legend">
+    <b>Playlist Builder: class diagram</b>
+    △ inheritance &nbsp; ◆ composition &nbsp; ◇ aggregation (shared) &nbsp; ⇢ uses / creates
+  </div>
+
+  <div class="cls web" id="PlaylistApp" style="left:560px; top:90px; width:360px">
+    <h3>PlaylistApp</h3>
+    <div class="sec">- library_ : Library
+- playlists_ : Registry&lt;Playlist&gt;
+- storage_ : Storage
+- scanner_ : FolderScanner
+- router_ : Router
+- mutex_ : std::mutex</div>
+    <div class="sec">+ PlaylistApp(dataFile, publicDir, samplesDir)
++ handle(HttpRequest&amp;) : HttpResponse
+- registerRoutes() : void
+- persist() : void
+- buildMedia(id, Json) : shared_ptr&lt;Media&gt;</div>
+  </div>
+
+  <div class="cls web" id="Router" style="left:1020px; top:90px; width:260px">
+    <h3>Router</h3>
+    <div class="sec">- routes_ : vector&lt;Route&gt;</div>
+    <div class="sec">+ add(method, pattern, Handler)
++ dispatch(HttpRequest&amp;)
+    : optional&lt;HttpResponse&gt;</div>
+  </div>
+
+  <div class="cls web" id="HttpServer" style="left:1320px; top:90px; width:250px">
+    <h3>HttpServer</h3>
+    <div class="sec">- host_ : string
+- port_ : int
+- handler_ : Handler</div>
+    <div class="sec">+ run() : void
+- serveConnection(int)
+- readRequest(...) : bool
+- sendResponse(...)</div>
+  </div>
+
+  <div class="cls web" id="HttpReqRes" style="left:1170px; top:330px; width:400px">
+    <h3>HttpRequest / HttpResponse</h3>
+    <div class="sec">method, path, query : map, headers : map, body
+status, headers : vector&lt;pair&gt;, body, filePath</div>
+    <div class="sec">+ json() : Json          + HttpResponse::json(Json, int)
++ queryParam(name)      + HttpResponse::file(path, range)</div>
+  </div>
+
+  <div class="cls data" id="Library" style="left:40px; top:400px; width:330px">
+    <h3>Library</h3>
+    <div class="sec">- items_ : unordered_map&lt;string,
+          shared_ptr&lt;Media&gt;&gt;
+- order_ : vector&lt;string&gt;
+- nextId_ : long long</div>
+    <div class="sec">+ add(shared_ptr&lt;Media&gt;)
++ replace(id, shared_ptr&lt;Media&gt;)
++ remove(id) / get(id)
++ search(query, MediaFilter, SortKey)
+    : vector&lt;shared_ptr&lt;Media&gt;&gt;
++ stats() : LibraryStats</div>
+  </div>
+
+  <div class="cls data" id="Registry" style="left:420px; top:430px; width:300px">
+    <h3>Registry&lt;T&gt;<small>template class (T = Playlist)</small></h3>
+    <div class="sec">- items_ : map&lt;string, T&gt;
+- order_ : vector&lt;string&gt;</div>
+    <div class="sec">+ add(T) : T&amp;
++ get(id) : T&amp;
++ remove(id)
++ forEach(function&lt;void(T&amp;)&gt;)</div>
+  </div>
+
+  <div class="cls data" id="Playlist" style="left:420px; top:700px; width:300px">
+    <h3>Playlist</h3>
+    <div class="sec">- id_, name_, description_ : string
+- tracks_ : vector&lt;shared_ptr&lt;Media&gt;&gt;</div>
+    <div class="sec">+ Playlist(id, name, description)
++ Playlist(const Playlist&amp;)   «copy»
++ add() / removeAt() / move()
++ shuffle() / totalDuration()
++ toM3u() : string
++ operator+=(shared_ptr&lt;Media&gt;)
++ operator[](size_t) : const Media&amp;</div>
+  </div>
+
+  <div class="cls" id="Storage" style="left:770px; top:430px; width:290px">
+    <h3>Storage</h3>
+    <div class="sec">- path_ : string</div>
+    <div class="sec">+ load(Library&amp;, Registry&amp;)
+    : vector&lt;string&gt;
++ save(const Library&amp;, const Registry&amp;)</div>
+  </div>
+
+  <div class="cls" id="FolderScanner" style="left:770px; top:610px; width:290px">
+    <h3>FolderScanner</h3>
+    <div class="sec">- extensions_ : set&lt;string&gt;</div>
+    <div class="sec">+ FolderScanner()  «delegating»
++ scan(folder) : vector&lt;Json&gt;
++ wavDurationSeconds(path) : int</div>
+  </div>
+
+  <div class="cls" id="Seeder" style="left:770px; top:790px; width:290px">
+    <h3>Seeder / SampleGenerator</h3>
+    <div class="sec">+ seed(Library&amp;, Registry&amp;)
++ generate(Spec) : string  (WAV)</div>
+  </div>
+
+  <div class="cls" id="Json" style="left:770px; top:930px; width:290px">
+    <h3>Json</h3>
+    <div class="sec">- kind_ : Kind, array_, object_ ...</div>
+    <div class="sec">+ parse(text) : Json   «static»
++ dump(indent) : string
++ operator[](key) : Json&amp;</div>
+  </div>
+
+  <div class="cls abstract" id="Media" style="left:40px; top:760px; width:330px">
+    <h3>Media<small>«abstract»</small></h3>
+    <div class="sec"># id_, title_, creator_, source_ : string
+# duration_, plays_ : int   favorite_ : bool
+- liveCount_ : int  «static»</div>
+    <div class="sec">+ type() : string = 0
++ typeLabel() : string = 0
++ subtitle() : string = 0
++ m3uLabel() : string   «virtual»
++ matches(query) : bool «virtual»
+# writeFields(Json&amp;) = 0
++ toJson() / toM3uEntry()
++ operator&lt;  /  operator&lt;&lt;</div>
+  </div>
+
+  <div class="cls" id="Song" style="left:20px; top:1090px; width:230px">
+    <h3>Song</h3>
+    <div class="sec">- album_, genre_ : string
+- year_ : int</div>
+  </div>
+  <div class="cls" id="PodcastEpisode" style="left:270px; top:1090px; width:230px">
+    <h3>PodcastEpisode</h3>
+    <div class="sec">- show_ : string
+- episode_ : int</div>
+  </div>
+  <div class="cls" id="Audiobook" style="left:520px; top:1090px; width:230px">
+    <h3>Audiobook</h3>
+    <div class="sec">- narrator_ : string
+- chapter_ : int</div>
+  </div>
+
+  <div class="cls" id="MediaFactory" style="left:420px; top:960px; width:300px">
+    <h3>MediaFactory</h3>
+    <div class="sec">+ create(id, Json) : shared_ptr&lt;Media&gt;  «static»</div>
+  </div>
+
+  <div class="cls exc" id="StdErr" style="left:1170px; top:560px; width:260px">
+    <h3>std::runtime_error</h3>
+  </div>
+  <div class="cls exc" id="AppException" style="left:1170px; top:650px; width:260px">
+    <h3>AppException</h3>
+    <div class="sec">- status_ : int</div>
+    <div class="sec">+ status() : int
++ type() : string  «virtual»</div>
+  </div>
+  <div class="cls exc" id="Exceptions" style="left:1110px; top:860px; width:460px">
+    <h3>Derived exceptions (each overrides type())</h3>
+    <div class="sec">InvalidMediaException (400)    BadRequestException (400)
+NotFoundException (404)        MethodNotAllowedException (405)
+DuplicateException (409)       EmptyPlaylistException (422)
+StorageException (500)</div>
+  </div>
+</div>
+
+<svg id="edges"></svg>
+<script>
+const svg = document.getElementById('edges');
+const canvas = document.getElementById('canvas');
+svg.setAttribute('width', canvas.offsetWidth);
+svg.setAttribute('height', canvas.offsetHeight);
+svg.innerHTML = `<defs>
+  <marker id="tri" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="14" markerHeight="14" orient="auto-start-reverse">
+    <path d="M1,1 L11,6 L1,11 z" fill="#fff" stroke="#2b2d42" stroke-width="1.3"/></marker>
+  <marker id="dia" viewBox="0 0 14 10" refX="13" refY="5" markerWidth="16" markerHeight="12" orient="auto-start-reverse">
+    <path d="M1,5 L7,1 L13,5 L7,9 z" fill="#2b2d42"/></marker>
+  <marker id="odia" viewBox="0 0 14 10" refX="13" refY="5" markerWidth="16" markerHeight="12" orient="auto-start-reverse">
+    <path d="M1,5 L7,1 L13,5 L7,9 z" fill="#fff" stroke="#2b2d42" stroke-width="1.2"/></marker>
+  <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" orient="auto-start-reverse">
+    <path d="M1,1 L9,5 L1,9" fill="none" stroke="#555" stroke-width="1.4"/></marker>
+</defs>`;
+
+function box(id) {
+  const el = document.getElementById(id);
+  return { x: el.offsetLeft, y: el.offsetTop, w: el.offsetWidth, h: el.offsetHeight };
+}
+function anchor(id, side, t = 0.5) {
+  const b = box(id);
+  if (side === 'top') return [b.x + b.w * t, b.y];
+  if (side === 'bottom') return [b.x + b.w * t, b.y + b.h];
+  if (side === 'left') return [b.x, b.y + b.h * t];
+  return [b.x + b.w, b.y + b.h * t];
+}
+// kind: inherit (triangle at target), compose (filled diamond at source), share (hollow diamond at source), use (dashed arrow)
+function edge(from, fs, to, ts, kind, opts = {}) {
+  const [x1, y1] = anchor(from, fs, opts.ft ?? 0.5);
+  const [x2, y2] = anchor(to, ts, opts.tt ?? 0.5);
+  let d;
+  if (opts.via) {
+    d = `M${x1},${y1} ` + opts.via.map(([x, y]) => `L${x},${y}`).join(' ') + ` L${x2},${y2}`;
+  } else if ((fs === 'top' || fs === 'bottom') && (ts === 'top' || ts === 'bottom')) {
+    const my = opts.mid ?? (y1 + y2) / 2;
+    d = `M${x1},${y1} L${x1},${my} L${x2},${my} L${x2},${y2}`;
+  } else if ((fs === 'left' || fs === 'right') && (ts === 'left' || ts === 'right')) {
+    const mx = opts.mid ?? (x1 + x2) / 2;
+    d = `M${x1},${y1} L${mx},${y1} L${mx},${y2} L${x2},${y2}`;
+  } else if (fs === 'left' || fs === 'right') {
+    d = `M${x1},${y1} L${x2},${y1} L${x2},${y2}`;
+  } else {
+    d = `M${x1},${y1} L${x1},${y2} L${x2},${y2}`;
+  }
+  const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  p.setAttribute('d', d);
+  p.setAttribute('fill', 'none');
+  p.setAttribute('stroke', kind === 'use' ? '#666' : '#2b2d42');
+  p.setAttribute('stroke-width', '1.5');
+  if (kind === 'use') p.setAttribute('stroke-dasharray', '6 4');
+  if (kind === 'inherit') p.setAttribute('marker-end', 'url(#tri)');
+  if (kind === 'compose') p.setAttribute('marker-start', 'url(#dia)');
+  if (kind === 'share') p.setAttribute('marker-start', 'url(#odia)');
+  if (kind === 'use') p.setAttribute('marker-end', 'url(#arr)');
+  svg.appendChild(p);
+  if (opts.label) {
+    const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    t.setAttribute('x', opts.lx ?? (x1 + x2) / 2 + 4);
+    t.setAttribute('y', opts.ly ?? (y1 + y2) / 2 - 4);
+    t.setAttribute('font-size', '12');
+    t.setAttribute('fill', '#444');
+    t.textContent = opts.label;
+    svg.appendChild(t);
+  }
+}
+
+edge('Song', 'top', 'Media', 'bottom', 'inherit', { mid: 1060, tt: 0.5 });
+edge('PodcastEpisode', 'top', 'Media', 'bottom', 'inherit', { mid: 1060, tt: 0.5 });
+edge('Audiobook', 'top', 'Media', 'bottom', 'inherit', { mid: 1060, tt: 0.5 });
+
+edge('PlaylistApp', 'left', 'Library', 'top', 'compose', { ft: 0.3 });
+edge('PlaylistApp', 'bottom', 'Registry', 'top', 'compose', { ft: 0.2 });
+edge('PlaylistApp', 'bottom', 'Storage', 'top', 'compose', { ft: 0.65 });
+edge('PlaylistApp', 'right', 'Router', 'left', 'compose', { ft: 0.25, tt: 0.3 });
+{
+  const fsBox = box('FolderScanner');
+  const appBox = box('PlaylistApp');
+  const y = appBox.y + appBox.h * 0.88;
+  const yt = fsBox.y + fsBox.h * 0.4;
+  edge('PlaylistApp', 'right', 'FolderScanner', 'right', 'compose', { ft: 0.88, tt: 0.4, via: [[1110, y], [1110, yt]] });
+}
+edge('HttpServer', 'bottom', 'HttpReqRes', 'top', 'use', { ft: 0.5, tt: 0.85 });
+edge('HttpServer', 'left', 'Router', 'right', 'use', { label: 'calls', tt: 0.5, ft: 0.3, lx: 1286, ly: 84 });
+
+edge('Registry', 'bottom', 'Playlist', 'top', 'compose', { label: '0..*' , lx: 576, ly: 690 });
+edge('Library', 'bottom', 'Media', 'top', 'share', { label: '0..*', lx: 210, ly: 750 });
+edge('Playlist', 'left', 'Media', 'right', 'share', { label: '0..*', ft: 0.35, tt: 0.25, lx: 378, ly: 812 });
+edge('MediaFactory', 'left', 'Media', 'right', 'use', { label: 'creates', tt: 0.82, lx: 376, ly: 965 });
+edge('Storage', 'left', 'Registry', 'right', 'use', { ft: 0.6, tt: 0.4 });
+edge('Seeder', 'left', 'Playlist', 'right', 'use', { ft: 0.5, tt: 0.6 });
+
+edge('AppException', 'top', 'StdErr', 'bottom', 'inherit');
+edge('Exceptions', 'top', 'AppException', 'bottom', 'inherit', { ft: 0.38, tt: 0.5 });
+</script>
+</body>
+</html>

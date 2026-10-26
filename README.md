@@ -29,6 +29,14 @@ docker build -t playlist-builder .
 docker run -p 8080:8080 playlist-builder
 ```
 
+### Deploy to Render
+
+`render.yaml` is a Render Blueprint. In the Render dashboard choose
+**New → Blueprint**, pick this repository, and Render builds the Dockerfile and
+serves it on a public `onrender.com` URL. On the free plan the disk is
+ephemeral, so the library resets to the demo data after a redeploy or when the
+service sleeps.
+
 ## Using it
 
 - **Library** (home icon): search, filter by type or favourites, sort, click to play.
